@@ -317,12 +317,6 @@ def plotlifespanspread(data, column):
     
     
     df_a_lists = pd.DataFrame(perc_alive_lists,index=['20%','40%','60%','80%','100%','count'])
-    columns = ['Set1','Set2','Set3','Set4','Set5','Set6','Set7','Set8','Set9','Set10',
-               'Set11','Set12','Set13','Set14','Set15','Set16','Set17','Set18','Set19',
-               'Set20','Set21','Set22','Set23','Set24','Set25','Set26','Set27','Set28',
-               'Set29','Set30','Set31']
-    df_a_lists.columns = columns
-    df_a_lists = df_a_lists.transpose()
     #df_a_lists = df_a_lists.sort_values(by=['25%'],ascending=False)
     
     return df_a_lists, lifespan_lists
@@ -399,11 +393,9 @@ def plotmeanlifespan(data,column_name, N):
 
 #%%# Read in N2 Lifespans Data ####
 path = os.getcwd()
-filename = 'N2 Lifespans.xlsx'
+filename = 'N2 Lifespans FINAL.xlsx'
 path = os.path.join(path, filename)
-numberofentries = 1000
-rowstoskip = 1004 - numberofentries
-data = pd.read_excel(path,skipfooter=rowstoskip)
+data = pd.read_excel(path)
 data = data.drop(columns=data.columns[0])
 
 #### Percent of data excluded for different categories ####
@@ -776,6 +768,64 @@ print('t-test between 20C and 25C gives a p-value of {}'.format(round(
 #pd.DataFrame(mls_temp,index=['15C','20C','25C']).transpose().to_csv('/Users/nickurban/Desktop/N2 Lifespan Variability/Figures/mls_fig1E.csv')
 pd.DataFrame(mls_temp,index=['15C','20C','25C']).transpose().to_csv('figures/Fig1E.csv')
 
+#%% New fig
+
+""" MLS Data for new fig """ 
+ind_mls = data_all.columns.get_loc('Reported mean lifespan')
+ind_count = data_all.columns.get_loc('Count')
+
+index2 = [3,7,0,0,0,1,1,1] # multiple 0's and 1's for the three random samples of both groups
+mls_temp2 = [[] for _ in range(len(index2))]
+
+m = data_all.iloc[index2[0],ind_mls]
+m = [x for x in m if x > -1.0]
+max_samples = len(m)
+for j in range(len(index2)):
+    if index2[j] == 0 or index2[j] == 1:
+        vals = data_all.iloc[index2[j],ind_mls]
+        vals = [x for x in vals if x > -1.0]
+        temp = random.sample(vals,max_samples)
+    else:
+        temp = data_all.iloc[index2[j],ind_mls]
+        temp = [x for x in temp if x > -1.0]
+    #a = np.array(temp, int)
+    mls_temp2[j] = temp
+    
+cols = ['20/25 (Index 3)','25/20 (Index 7)','Rand Samples 1 of 20/20 (Index 0)',\
+        'Rand Samples 2 of 20/20 (Index 0)','Rand Samples 3 of 20/20 (Index 0)',\
+        'Rand Samples 1 of 25/25 (Index 1)','Rand Samples 2 of 25/25 (Index 1)',\
+        'Rand Samples 3 of 25/25 (Index 1)']
+pd.DataFrame(mls_temp2,index=cols).transpose().to_csv('figures/New_fig_mls_data.csv')
+
+### Vertical Spread Graphs for new fig ###
+""" 
+
+daystoplot = ['% Alive on Day15','% Alive on Day20','% Alive on Day25']
+L = len(data_all)
+L2 = len(daystoplot)
+
+max_samples2 = data_all.iloc[index2[0],ind_count]
+ind_names_temp = ['M 20°C, C 25°C \n {}'.format(data_all.iloc[index2[2],ind_count]),
+                  'M 25°C, C 20°C \n {}'.format(data_all.iloc[index2[3],ind_count]),
+                  'Rand 1 M 20°C, C 20°C \n {}'.format(max_samples2),
+                  'Rand 2 M 20°C, C 20°C \n {}'.format(max_samples2),
+                  'Rand 3 M 20°C, C 20°C \n {}'.format(max_samples2),
+                  'Rand 1 M 25°C, C 25°C \n {}'.format(max_samples2),
+                  'Rand 2 M 25°C, C 25°C \n {}'.format(max_samples2),
+                  'Rand 3 M 25°C, C 25°C \n {}'.format(max_samples2),]
+
+for ii in range(L2):
+    df_alive,lifespan_lists = plotlifespanspread(data_all, daystoplot[ii])
+    columns = ['Set1','Set2','Set3','Set4','Set5','Set6','Set7','Set8','Set9','Set10',
+               'Set11','Set12','Set13','Set14','Set15','Set16','Set17']
+    df_alive.columns = columns
+    df_alive = df_alive.transpose()
+    
+    df_tempFUDR = df_alive.iloc[index2,:]
+    df_tempFUDR.index = ind_names_temp 
+    
+"""
+
 #%% FUDR vs No FUDR
 """
                          FIGURE 2 
@@ -927,6 +977,13 @@ ind_names_tempFUDR = ['(-)FUDR \n {} (15°C)'.format(data_all2.iloc[13,ind_count
 
 for ii in range(L2):
     df_alive,lifespan_lists = plotlifespanspread(data_all2, daystoplot[ii])
+    columns = ['Set1','Set2','Set3','Set4','Set5','Set6','Set7','Set8','Set9','Set10',
+               'Set11','Set12','Set13','Set14','Set15','Set16','Set17','Set18','Set19',
+               'Set20','Set21','Set22','Set23','Set24','Set25','Set26','Set27','Set28',
+               'Set29','Set30','Set31']
+    df_alive.columns = columns
+    df_alive = df_alive.transpose()
+    
     df_tempFUDR = df_alive.iloc[ind_tempFUDR,:]
     df_tempFUDR.index = ind_names_tempFUDR
     
