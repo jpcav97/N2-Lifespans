@@ -12,6 +12,8 @@ import random
 import statsmodels.api as sm
 from sklearn.linear_model import LinearRegression
 
+column_days = ['Day3','Day5','Day10','Day15','Day20','Day25','Day30','Day40','Day50']
+
 def get_ttfp(data,transf1,transf2,isnm,tempm,tempc,isFUDR1,isFUDR2):
     ttfpcolumns = ['% Alive on Day3','% Alive on Day5','% Alive on Day10','% Alive on Day15',
               '% Alive on Day20','% Alive on Day25','% Alive on Day30',
@@ -106,6 +108,39 @@ def get_ttfp(data,transf1,transf2,isnm,tempm,tempc,isFUDR1,isFUDR2):
                                        'Day25','Day30','Day40','Day50']).transpose()
     del ttfp_lists_nm,ttfp_lists_m,ttfp_lists_nm_all,ttfp_lists_m_all
     return df_totnm,df_totm,data_nm,data_m,df_totnm_all,df_totm_all
+
+def get_FUDR(data,conc):
+    FUDRcolumns = ['% Alive on Day3','% Alive on Day5','% Alive on Day10','% Alive on Day15',
+              '% Alive on Day20','% Alive on Day25','% Alive on Day30',
+              '% Alive on Day40','% Alive on Day50','Reported mean lifespan']
+    ind_day3 = data.columns.get_loc('% Alive on Day3')
+    ind_mls = data.columns.get_loc('Reported mean lifespan')
+    ind_FUDRconc = data.columns.get_loc('FUDR Concentration (microM)')
+    listFUDR = data.iloc[(1,ind_FUDRconc)] #Create list of FUDR concentrations for entries
+    ind_FUDR = [i for i, x in enumerate(listFUDR) if x == conc] # Find where conc = 40
+    
+    # Find and save % Alive values for FUDR = 40 entries for day 3 - 50 and rml
+    FUDR_lists = [[] for _ in range(len(FUDRcolumns))]
+    for i in range(ind_day3,ind_mls+1):
+        for j in ind_FUDR:
+            FUDR_lists[i-ind_day3].append(data.iloc[(1,i)][j])
+    
+    df_totFUDR = pd.DataFrame(FUDR_lists, index = FUDRcolumns)
+
+    # Figure out stats for each day
+    Ldays = len(FUDRcolumns)-1
+    FUDR_datalists = [[] for _ in range(Ldays)]
+    for i in range(Ldays):
+        s = df_totFUDR.iloc[i,:].describe()
+        FUDR_datalists[i] = [s['count'],round(s['mean'],2),s['25%'],s['50%'],s['75%'],s['std']]
+
+    FUDR_datalists = list(map(list,zip(*FUDR_datalists)))
+    
+    # Turn list of lists into dataframe
+    df_FUDR = pd.DataFrame(FUDR_datalists,index=['count','mean','25%','median','75%','std'], 
+                              columns=column_days).transpose()
+
+    return df_totFUDR.transpose(),df_FUDR
 
 def randomvals_and_diff(data,ind_rml,lab):
     L = int(len(data)/2)
