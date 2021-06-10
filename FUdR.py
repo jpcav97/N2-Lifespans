@@ -54,68 +54,88 @@ column_days = ['Day3','Day5','Day10','Day15','Day20','Day25','Day30','Day40','Da
 """
                         FIGURE 2 - FUDR vs Non-FUDR
                                                              """
-# LIFESPAN PLOT to compare FUDR to w/o FUDR
-ind_day3 = data_all2.columns.get_loc('% Alive on Day3')
-ind_day50 = data_all2.columns.get_loc('% Alive on Day50')
-ind_count = data_all2.columns.get_loc('Count')
-wFUDR_list = [[] for _ in range(len(days))]
-woFUDR_list = [[] for _ in range(len(days))]
+temps = [15,20,25]
+for i in range(len(temps)):                                                    
+    x = data_all2.loc[(data_all2['FUDR (Yes/No?)'] == 'No') &
+                      (data_all2['Growth Media'] == 'NGM') &
+                      (data_all2['Temperature Maintained (Through L4, C)'] == temps[i]) &
+                      (data_all2['Temperature Cultivated (Adult, C)'] == temps[i])]
+    y = data_all2.loc[(data_all2['FUDR (Yes/No?)'] == 'Yes') & 
+                      (data_all2['Growth Media'] == 'NGM') &
+                      (data_all2['Temperature Maintained (Through L4, C)'] == temps[i]) &
+                      (data_all2['Temperature Cultivated (Adult, C)'] == temps[i])]
 
-for i in range(ind_day3,ind_day50+1):
-    s = pd.Series(data_all2.iloc[0,i]).describe() # 0 = without FUDR
-    woFUDR_list[i-ind_day3] = [s['count'],round(s['mean'],2),s['25%'],s['50%'],s['75%'],s['std']]
+    # LIFESPAN PLOT to compare FUDR to w/o FUDR
+    ind_day3 = x.columns.get_loc('% Alive on Day3')
+    ind_day50 = x.columns.get_loc('% Alive on Day50')
+    ind_count = x.columns.get_loc('Count')
+    wFUDR_list = [[] for _ in range(len(days))]
+    woFUDR_list = [[] for _ in range(len(days))]
 
-#Transpose list of lists
-woFUDR_list = list(map(list, zip(*woFUDR_list))) 
-df_woFUDR = pd.DataFrame(woFUDR_list,index=['count','mean','25%','median','75%','std'], 
-                      columns=column_days).transpose()
+    for j in range(ind_day3,ind_day50+1):
+        s = pd.Series(x.iloc[0,j]).describe()
+        woFUDR_list[j-ind_day3] = [s['count'],round(s['mean'],2),s['25%'],s['50%'],s['75%'],s['std']]
 
-for i in range(ind_day3,ind_day50+1):
-    s = pd.Series(data_all2.iloc[1,i]).describe() # 1 = with FUDR
-    wFUDR_list[i-ind_day3] = [s['count'],round(s['mean'],2),s['25%'],s['50%'],s['75%'],s['std']]
+    #Transpose list of lists
+    woFUDR_list = list(map(list, zip(*woFUDR_list))) 
+    df_woFUDR = pd.DataFrame(woFUDR_list,index=['count','mean','25%','median','75%','std'], 
+                          columns=column_days).transpose()
 
-#Transpose list of lists
-wFUDR_list = list(map(list, zip(*wFUDR_list))) 
-df_wFUDR = pd.DataFrame(wFUDR_list,index=['count','mean','25%','median','75%','std'], 
-                      columns=column_days).transpose()
+    for j in range(ind_day3,ind_day50+1):
+        s = pd.Series(y.iloc[0,j]).describe()
+        wFUDR_list[j-ind_day3] = [s['count'],round(s['mean'],2),s['25%'],s['50%'],s['75%'],s['std']]
+    
+    #Transpose list of lists
+    wFUDR_list = list(map(list, zip(*wFUDR_list))) 
+    df_wFUDR = pd.DataFrame(wFUDR_list,index=['count','mean','25%','median','75%','std'], 
+                          columns=column_days).transpose()
 
-fig = plt.figure(figsize=(10,6))
-ax = fig.add_axes([0.1,0.15,0.8,0.8]) # main axes
-color_cycle = ["black", "dodgerblue", "chocolate"] 
-ind = [3,5,10,15,20,25,30,40,50]
-ax.plot(ind,df_wFUDR['mean'], color=color_cycle[0],label='Mean (with FUDR)') # Change legend here
-ax.plot(ind,df_woFUDR['mean'], color='r',label='Mean (w/o FUDR)') # Change legend here
-ax.fill_between(ind, df_wFUDR['mean']-2*df_wFUDR['std'], df_wFUDR['mean']+2*df_wFUDR['std'], 
-                 facecolor=color_cycle[2], label='2x std')
-ax.fill_between(ind, df_wFUDR['mean']-df_wFUDR['std'], df_wFUDR['mean']+df_wFUDR['std'], 
-                 facecolor=color_cycle[1],label='1x std')
+    fig = plt.figure(figsize=(10,6))
+    ax = fig.add_axes([0.1,0.15,0.8,0.8]) # main axes
+    color_cycle = ["black", "dodgerblue", "chocolate"] 
+    ind = [3,5,10,15,20,25,30,40,50]
+    ax.plot(ind,df_wFUDR['mean'], color=color_cycle[0],label='Mean (with FUDR)') # Change legend here
+    ax.plot(ind,df_woFUDR['mean'], color='r',label='Mean (w/o FUDR)') # Change legend here
+    ax.fill_between(ind, df_wFUDR['mean']-2*df_wFUDR['std'], df_wFUDR['mean']+2*df_wFUDR['std'], 
+                     facecolor=color_cycle[2], label='2x std')
+    ax.fill_between(ind, df_wFUDR['mean']-df_wFUDR['std'], df_wFUDR['mean']+df_wFUDR['std'], 
+                     facecolor=color_cycle[1],label='1x std')
+    
+    ax.set_ylim(-60,140)
+    ax.set_xticks(ind)
+    ax.set_xticklabels(df_wFUDR.index, fontsize=12, rotation = 70)
+    ax.set_yticks(np.arange(-60,160,20))
+    ax.set_yticklabels(np.arange(-60,160,20), fontsize=12)
+    ax.set_title('With FUDR (n = {}) and Without FUDR (n = {})'.format(int(df_wFUDR['count'][0]),int(df_woFUDR['count'][0])), fontsize=14,x=0.5) # Change titles here
+    ax.set_ylabel('% Survival',fontsize=20)
+    ax.legend(fontsize=14)
+    plt.show()
 
-ax.set_ylim(-60,140)
-ax.set_xticks(ind)
-ax.set_xticklabels(df_wFUDR.index, fontsize=12, rotation = 70)
-ax.set_yticks(np.arange(-60,160,20))
-ax.set_yticklabels(np.arange(-60,160,20), fontsize=12)
-ax.set_title('With FUDR (n = {}) and Without FUDR (n = {})'.format(int(df_wFUDR['count'][0]),int(df_woFUDR['count'][0])), fontsize=14,x=0.5) # Change titles here
-ax.set_ylabel('% Survival',fontsize=20)
-ax.legend(fontsize=14)
-plt.show()
+    print('2A (-)FUDR: n = {}'.format(df_wFUDR['count'][0]))
+    print('2A FUDR: n = {}'.format(df_woFUDR['count'][0]))
 
-print('2A (-)FUDR: n = {}'.format(df_wFUDR['count'][0]))
-print('2A FUDR: n = {}'.format(df_woFUDR['count'][0]))
-
-df_wFUDR.to_csv('figures/Fig2A_wFUDR.csv')
-df_woFUDR.to_csv('figures/Fig2A_woFUDR.csv')
+    df_wFUDR.to_csv('saved_data/Temp{}_wFUdR_lsp.csv'.format(temps[i]))
+    df_woFUDR.to_csv('saved_data/Temp{}_woFUdR_lsp.csv'.format(temps[i]))
+    
+    if i == 0:
+        x15 = x
+        y15 = y
+    elif i == 1:
+        x20 = x
+        y20 = y
+    elif i == 2:
+        x25 = x
+        y25 = y
 
 #%% Figure 2B - MEAN LIFESPAN PLOT of FUDR vs Non-FUDR
-ind_mls = data_all2.columns.get_loc('Reported mean lifespan')
-mls_FUDR = [[] for _ in range(2)]
+ind_mls = x15.columns.get_loc('Reported mean lifespan')
+xys = [x15,y15,x20,y20,x25,y25]
+mls_FUDR = [[] for _ in range(len(xys))]
 
 # Fill in mls blanks with -2.0
-for j in range(2):
-    temp = data_all2.iloc[j,ind_mls]
-    temp = [x for x in temp if x > -1.0]
-    #a = np.array(temp, int)
-    mls_FUDR[j] = temp
+for j in range(len(xys)):
+    t = xys[j].iloc[0,ind_mls]
+    mls_FUDR[j] = [x for x in t if x > -1.0]
 
 # Create a figure instance
 fig = plt.figure()
@@ -125,59 +145,70 @@ ax = fig.add_axes([0,0,1,1])
 #bp = ax.violinplot(mls_temp)
 bp = ax.boxplot(mls_FUDR)
 ax.set_ylim(0,40)
-ax.set_xticks([1,2])
-ax.set_xticklabels(['(-)FUDR \n (n = {})'.format(len(mls_FUDR[0])),
-                    'FUDR \n (n = {})'.format(len(mls_FUDR[1]))], fontsize=12)
+ax.set_xticks([1,2,3,4,5,6])
+ax.set_xticklabels(['(-)FUDR \n temp = 15˚C \n (n = {})'.format(len(mls_FUDR[0])),\
+                    'FUDR \n temp = 15˚C \n (n = {})'.format(len(mls_FUDR[1])),\
+                   '(-)FUDR \n temp = 20˚C \n (n = {})'.format(len(mls_FUDR[2])),\
+                    'FUDR \n temp = 20˚C \n (n = {})'.format(len(mls_FUDR[3])),\
+                   '(-)FUDR \n temp = 25˚C \n (n = {})'.format(len(mls_FUDR[4])),\
+                    'FUDR \n temp = 25˚C \n (n = {})'.format(len(mls_FUDR[5]))],\
+                   fontsize=10)
 ax.set_yticks(np.arange(0,45,5))
 ax.set_yticklabels(np.arange(0,45,5), fontsize=12)
-ax.set_title('Average Reported Lifespan with and without FUDR', fontsize=16,x=0.5,y=1.03) # Change titles here
+ax.set_title('Average Reported Lifespan with and without FUDR at 15, 20, and 25˚C',
+             fontsize=16,x=0.5,y=1.03)
 ax.set_ylabel('Average Lifespan (Days)',fontsize=12)
 
 for line in bp['medians']:
     # get position data for median line
     x, y = line.get_xydata()[1] 
     # overlay median value
-    plt.text(x, y, '%.1f' % y, verticalalignment='center') # draw above, centered
+    plt.text(x, y, '%.1f' % y, verticalalignment='center',fontsize=8) # draw above, centered
 
 for line in bp['boxes']:
     x, y = line.get_xydata()[0] 
     plt.text(x,y, '%.1f' % y,
          verticalalignment='bottom',
-         horizontalalignment='right')  
+         horizontalalignment='right',fontsize=8)  
     x, y = line.get_xydata()[3]
     plt.text(x,y, '%.1f' % y,
          verticalalignment='top',
-         horizontalalignment='right')
+         horizontalalignment='right',fontsize=8)
 
 for line in bp['caps']:
     x, y = line.get_xydata()[0] 
     plt.text(x,y, '%.1f' % y,
          verticalalignment='bottom',
-         horizontalalignment='right')  
+         horizontalalignment='left',fontsize=8)  
 
 print('t-test between FUDR and no FUDR gives a p-value of {}'.format(round(
-    stats.ttest_ind(mls_FUDR[0],mls_FUDR[1])[1],3)))
+    stats.ttest_ind(mls_FUDR[0],mls_FUDR[3])[1],3)))
 
-print('2B (-)FUDR: n = {}'.format(len(mls_FUDR[0])))
-print('2B FUDR: n = {}'.format(len(mls_FUDR[1])))
+print('2B 15˚C (-)FUDR: n = {}'.format(len(mls_FUDR[0])))
+print('2B 15˚C FUDR: n = {}'.format(len(mls_FUDR[1])))
+print('2B 20˚C (-)FUDR: n = {}'.format(len(mls_FUDR[2])))
+print('2B 20˚C FUDR: n = {}'.format(len(mls_FUDR[3])))
+print('2B 25˚C (-)FUDR: n = {}'.format(len(mls_FUDR[4])))
+print('2B 25˚C FUDR: n = {}'.format(len(mls_FUDR[5])))
 
 ######### Saving the Data #############
-#pd.DataFrame(mls_FUDR,index=['noFUDR','wFUDR']).transpose().to_csv('/Users/nickurban/Desktop/N2 Lifespan Variability/Figures/mls_fig2B.csv')
-pd.DataFrame(mls_FUDR,index=['noFUDR','wFUDR']).transpose().to_csv('figures/Fig2B.csv')
+index = ['(-)FUDR 15˚C','FUDR 15˚C','(-)FUDR 20˚C','FUDR 20˚C','(-)FUDR 25˚C','FUDR 25˚C']
+# pd.DataFrame(mls_FUDR,index=index).transpose().to_csv('/Users/nickurban/Desktop/N2 Lifespan Variability/Figures/mls_fig2B.csv')
+FUdR_15_20_25_mls = pd.DataFrame(mls_FUDR,index=index).transpose()
+FUdR_15_20_25_mls.to_csv('saved_data/FUdR_15_20_25_mls.csv')
 
 #%% Figure 2C-E - LIFESPAN SPREAD GRAPHS
 daystoplot = ['% Alive on Day15','% Alive on Day20','% Alive on Day25']
 L = len(data_all2)
 L2 = len(daystoplot)
-ind_count = data_all2.columns.get_loc('Count')
+ind_count = x15.columns.get_loc('Count')
 
-ind_tempFUDR = [13,0,2,10,1,3] # Indices of no FUDR (15C,20C,25C) and w/ FUDR (15C,20C,25C)
-ind_names_tempFUDR = ['(-)FUDR \n {} (15°C)'.format(data_all2.iloc[13,ind_count]),
-                      'FUDR \n {} (15°C)'.format(data_all2.iloc[10,ind_count]),
-                      '(-)FUDR \n {} (20°C)'.format(data_all2.iloc[0,ind_count]),
-                      'FUDR \n {} (20°C)'.format(data_all2.iloc[1,ind_count]),
-                      '(-)FUDR \n {} (25°C)'.format(data_all2.iloc[2,ind_count]),
-                      'FUDR  \n {} (25°C)'.format(data_all2.iloc[3,ind_count]),]
+ind_names_tempFUDR = ['(-)FUDR \n n = {}\n (15°C)'.format(x15.iloc[0,ind_count]),
+                          'FUDR \n n = {}\n (15°C)'.format(y15.iloc[0,ind_count]),
+                          '(-)FUDR \n n = {}\n (20°C)'.format(x20.iloc[0,ind_count]),
+                          'FUDR \n n = {}\n (20°C)'.format(y20.iloc[0,ind_count]),
+                          '(-)FUDR \n n = {}\n (25°C)'.format(x25.iloc[0,ind_count]),
+                          'FUDR  \n n = {}\n (25°C)'.format(y25.iloc[0,ind_count]),]
 
 for ii in range(L2):
     df_alive,lifespan_lists = plotlifespanspread(data_all2, daystoplot[ii])
@@ -188,13 +219,14 @@ for ii in range(L2):
     df_alive.columns = columns
     df_alive = df_alive.transpose()
     
+    ind_tempFUDR = [h.index[-1] for h in xys]
     df_tempFUDR = df_alive.iloc[ind_tempFUDR,:]
     df_tempFUDR.index = ind_names_tempFUDR
     
     ind = [1,2,3.5,4.5,6,7]  # the x locations for the groups
     width = 0.7
     
-    fig = plt.figure(figsize=(16,10))
+    fig = plt.figure(figsize=(18,10))
     p1 = plt.bar(ind, df_tempFUDR['20%'], width, color='black')
     p2 = plt.bar(ind, df_tempFUDR['40%'], width, bottom=df_tempFUDR['20%'],color='chocolate')
     p3 = plt.bar(ind, df_tempFUDR['60%'], width, color='dodgerblue',\
@@ -221,13 +253,13 @@ for ii in range(L2):
 
     [print("%'s n = {}".format(x)) for x in df_tempFUDR['count']]
     if ii == 0:
-        df_tempFUDR.to_csv('figures/Fig2C.csv')
+        df_tempFUDR.to_csv('saved_data/Fig2C.csv')
 
     elif ii == 1:
-        df_tempFUDR.to_csv('figures/Fig2D.csv')
+        df_tempFUDR.to_csv('saved_data/Fig2D.csv')
 
     elif ii == 2:
-        df_tempFUDR.to_csv('figures/Fig2E.csv')
+        df_tempFUDR.to_csv('saved_data/Fig2E.csv')
 
 
 #%% Figure 2F

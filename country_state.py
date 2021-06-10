@@ -45,24 +45,6 @@ grouptypes1 = ['Growth Media','Temperature Maintained (Through L4, C)',\
 
 data_all = make_groups(data_new,grouptypes1,P)
 
-### Group entries by Temp, Growth Media, and FUDR (data for figure 2)
-grouptypes2 = ['Growth Media','Temperature Maintained (Through L4, C)',\
-              'Temperature Cultivated (Adult, C)','FUDR (Yes/No?)']
-
-data_all2 = make_groups(data_new,grouptypes2,P) 
-
-### Group entries by Temp, Growth Media, and Plate Transfers (data for figure 2)
-grouptypes3 = ['Growth Media','Temperature Maintained (Through L4, C)',\
-              'Temperature Cultivated (Adult, C)','# Transfers to Fresh Plates']
-
-data_all3 = make_groups(data_new,grouptypes3,P)
-
-### Group entries by Temp, Growth Media, FUDR, and Plate Transfers (data for figure 2)
-grouptypes4 = ['Growth Media','Temperature Maintained (Through L4, C)',\
-              'Temperature Cultivated (Adult, C)','FUDR (Yes/No?)','# Transfers to Fresh Plates']
-
-data_all4 = make_groups(data_new,grouptypes4,P) 
-
 days = ['% Alive on Day3','% Alive on Day5','% Alive on Day10','% Alive on Day15',
         '% Alive on Day20','% Alive on Day25','% Alive on Day30',
         '% Alive on Day40','% Alive on Day50']
@@ -314,7 +296,7 @@ for k in range(len(daystoplot)):
     elif k == 2:
         df_alive.to_csv('figures/Fig5D.csv')
     
-#%% Figure 5E - MENA LIFESPAN PLOTS FOR TOP 5 STATES/PROVINCES
+#%% Figure 5E - MEAN LIFESPAN PLOTS FOR TOP 5 STATES/PROVINCES
 for j in range(len(avg_set_states)):
     temp = list(avg_set_states[j])
     temp = [x for x in temp if x > -1.0]

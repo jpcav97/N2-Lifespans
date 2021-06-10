@@ -132,24 +132,6 @@ grouptypes1 = ['Growth Media','Temperature Maintained (Through L4, C)',\
 
 data_all = make_groups(data_new,grouptypes1,P)
 
-### Group entries by Temp, Growth Media, and FUDR (data for figure 2)
-grouptypes2 = ['Growth Media','Temperature Maintained (Through L4, C)',\
-              'Temperature Cultivated (Adult, C)','FUDR (Yes/No?)']
-
-data_all2 = make_groups(data_new,grouptypes2,P) 
-
-### Group entries by Temp, Growth Media, and Plate Transfers (data for figure 2)
-grouptypes3 = ['Growth Media','Temperature Maintained (Through L4, C)',\
-              'Temperature Cultivated (Adult, C)','# Transfers to Fresh Plates']
-
-data_all3 = make_groups(data_new,grouptypes3,P)
-
-### Group entries by Temp, Growth Media, FUDR, and Plate Transfers (data for figure 2)
-grouptypes4 = ['Growth Media','Temperature Maintained (Through L4, C)',\
-              'Temperature Cultivated (Adult, C)','FUDR (Yes/No?)','# Transfers to Fresh Plates']
-
-data_all4 = make_groups(data_new,grouptypes4,P) 
-
 days = ['% Alive on Day3','% Alive on Day5','% Alive on Day10','% Alive on Day15',
         '% Alive on Day20','% Alive on Day25','% Alive on Day30',
         '% Alive on Day40','% Alive on Day50']
@@ -226,7 +208,7 @@ set1_datalists = [[] for _ in range(len(days))]
 set2_datalists = [[] for _ in range(len(days))]
 set3_datalists = [[] for _ in range(len(days))]
 
-temp_ind = [6,0,1] # 0 = 20, 1 = 25, 6 = 15 ('index' = 'temp')
+temp_ind = [4,0,1] # 0 = 20, 1 = 25, 6 = 15 ('index' = 'temp')
 for j in temp_ind:
     # Turn list of lists into dataframe
     if j == temp_ind[0]:
@@ -290,30 +272,15 @@ for j in range(len(sets)):
     ax.legend(fontsize=14)
     plt.show()
 
-    # Save the image
-    png1 = io.BytesIO()
-    fig.savefig(png1, format="png")
-    
-    # # Load this image into PIL
-    png2 = Image.open(png1)
     print('n = {}'.format(sets[j]['count'][0]))
 
     if j == 0:
-        # Save as TIFF
-        png2.save('figures/Figure1B.tif')
-        png1.close() 
         sets[j].to_csv('figures/Fig1B.csv')
 
     if j == 1:
-    #     # Save as TIFF
-        png2.save('figures/Figure1C.tif')
-        png1.close()
         sets[j].to_csv('figures/Fig1C.csv')
 
     if j == 6:
-        # Save as TIFF
-        png2.save('figures/Figure1D.tif')
-        png1.close()
         sets[j].to_csv('figures/Fig1D.csv')
 
 
@@ -406,6 +373,7 @@ cols = ['20/25 (Index 3)','25/20 (Index 7)','Rand Samples 1 of 20/20 (Index 0)',
         'Rand Samples 2 of 20/20 (Index 0)','Rand Samples 3 of 20/20 (Index 0)',\
         'Rand Samples 1 of 25/25 (Index 1)','Rand Samples 2 of 25/25 (Index 1)',\
         'Rand Samples 3 of 25/25 (Index 1)']
-pd.DataFrame(mls_temp2,index=cols).transpose().to_csv('figures/New_fig_mls_data.csv')
+df_mls_data = pd.DataFrame(mls_temp2,index=cols).transpose()
+# df_mls_data.to_csv('figures/New_fig_mls_data.csv')
 
 
