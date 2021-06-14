@@ -287,9 +287,11 @@ def make_groups(data,entries,P): #IsBuff,IsLogTransf:
     grp['PM ID'] = pd.Series(PM_ID)
     grp['Lab'] = pd.Series(lab)
     
+    print('The total number of measurements = {}'.format(sum(grp['Count'])))
     grp  = grp.reindex(np.argsort(grp['Count'])[::-1])
     grp  = grp.reset_index(drop=True)
     dat = grp[grp["Count"]>=P]
+    print('The number of measurements after 3+ restriction = {}'.format(sum(dat['Count'])))
     
     return dat
 
