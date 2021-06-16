@@ -208,7 +208,16 @@ set1_datalists = [[] for _ in range(len(days))]
 set2_datalists = [[] for _ in range(len(days))]
 set3_datalists = [[] for _ in range(len(days))]
 
-temp_ind = [4,0,1] # 0 = 20, 1 = 25, 6 = 15 ('index' = 'temp')
+ind_15 = data_all[(data_all['Growth Media'] == 'NGM') & 
+                  (data_all['Temperature Maintained (Through L4, C)'] == 15) &
+                  (data_all['Temperature Cultivated (Adult, C)'] == 15)].index[0]
+ind_20 = data_all[(data_all['Growth Media'] == 'NGM') & 
+                  (data_all['Temperature Maintained (Through L4, C)'] == 20) &
+                  (data_all['Temperature Cultivated (Adult, C)'] == 20)].index[0]
+ind_25 = data_all[(data_all['Growth Media'] == 'NGM') & 
+                  (data_all['Temperature Maintained (Through L4, C)'] == 25) &
+                  (data_all['Temperature Cultivated (Adult, C)'] == 25)].index[0]
+temp_ind = [ind_15,ind_20,ind_25] 
 for j in temp_ind:
     # Turn list of lists into dataframe
     if j == temp_ind[0]:
@@ -222,7 +231,7 @@ for j in temp_ind:
                               columns=column_days).transpose()
     if j == temp_ind[1]:
         for i in range(ind_day3,ind_day50+1):
-            s = pd.Series(data_all.iloc[j,i]).describe() # 0 = 20, 1 = 25, 6 = 15 ('index' = 'temp')
+            s = pd.Series(data_all.iloc[j,i]).describe() 
             set2_datalists[i-ind_day3] = [s['count'],round(s['mean'],2),s['25%'],s['50%'],s['75%'],s['std']]
         
         #Transpose list of lists
@@ -232,7 +241,7 @@ for j in temp_ind:
         
     if j == temp_ind[2]:
         for i in range(ind_day3,ind_day50+1):
-            s = pd.Series(data_all.iloc[j,i]).describe() # 0 = 20, 1 = 25, 6 = 15 ('index' = 'temp')
+            s = pd.Series(data_all.iloc[j,i]).describe() 
             set3_datalists[i-ind_day3] = [s['count'],round(s['mean'],2),s['25%'],s['50%'],s['75%'],s['std']]
         
         #Transpose list of lists
@@ -283,7 +292,20 @@ for j in range(len(sets)):
     if j == 6:
         sets[j].to_csv('figures/Fig1D.csv')
 
+#%% Combined lifespan curves of 15, 20, and 25˚C
+full_datalists = [[] for _ in range(len(days))]
+for i in range(ind_day3,ind_day50+1):
+    s = pd.Series(data_all.iloc[ind_15,i])
+    s = s.append(pd.Series(data_all.iloc[ind_20,i]))
+    s = s.append(pd.Series(data_all.iloc[ind_25,i]))
+    s = s.describe() 
+    full_datalists[i-ind_day3] = [s['count'],round(s['mean'],2),s['25%'],s['50%'],s['75%'],s['std']]
 
+#Transpose list of lists
+full_datalists = list(map(list, zip(*full_datalists))) 
+df_set_full = pd.DataFrame(full_datalists,index=['count','mean','25%','median','75%','std'], 
+                      columns=column_days).transpose()
+df_set_full.to_csv('saved_data/15_20_25_combined_lsp_data.csv')
 #%% Figure 1E  - MEAN LIFESPAN PLOTS FOR 15, 20, and 25˚C
 ## combine these different collections into a list
 ind_mls = data_all.columns.get_loc('Reported mean lifespan')

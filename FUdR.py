@@ -50,6 +50,11 @@ days = ['% Alive on Day3','% Alive on Day5','% Alive on Day10','% Alive on Day15
         '% Alive on Day40','% Alive on Day50']
 
 column_days = ['Day3','Day5','Day10','Day15','Day20','Day25','Day30','Day40','Day50']
+
+#%% Stats
+yesno_tot = [len(data_new[data_new['FUDR (Yes/No?)'] == 'Yes']),
+             len(data_new[data_new['FUDR (Yes/No?)'] == 'No'])]
+
 #%% FUDR vs No FUDR
 """
                         FIGURE 2 - FUDR vs Non-FUDR
@@ -127,6 +132,19 @@ for i in range(len(temps)):
         x25 = x
         y25 = y
 
+num1,num2 = yesno_tot
+num3,num4 = [int(y20['Count']),int(x20['Count'])]
+num5,num6 = [int(y25['Count']),int(x25['Count'])]
+
+print('% wFUdR = {}, % noFUdR = {} (n = {})'.format(round(num1/(num1+num2),2),\
+                                                   round(num2/(num1+num2),2),\
+                                                   num1+num2))
+print('% wFUdR = {}, % noFUdR = {} (n = {})'.format(round(num3/(num3+num4),2),\
+                                                   round(num4/(num3+num4),2),\
+                                                   num3+num4))
+print('% wFUdR = {}, % noFUdR = {} (n = {})'.format(round(num5/(num5+num6),2),\
+                                                   round(num6/(num5+num6),2),\
+                                                   num5+num6))
 #%% Figure 2B - MEAN LIFESPAN PLOT of FUDR vs Non-FUDR
 ind_mls = x15.columns.get_loc('Reported mean lifespan')
 xys = [x15,y15,x20,y20,x25,y25]
@@ -214,8 +232,7 @@ for ii in range(L2):
     df_alive,lifespan_lists = plotlifespanspread(data_all2, daystoplot[ii])
     columns = ['Set1','Set2','Set3','Set4','Set5','Set6','Set7','Set8','Set9','Set10',
                'Set11','Set12','Set13','Set14','Set15','Set16','Set17','Set18','Set19',
-               'Set20','Set21','Set22','Set23','Set24','Set25','Set26','Set27','Set28',
-               'Set29','Set30','Set31']
+               'Set20','Set21','Set22','Set23','Set24','Set25','Set26']
     df_alive.columns = columns
     df_alive = df_alive.transpose()
     
@@ -364,17 +381,24 @@ ax5.set_ylabel('% Survival',fontsize=20)
 plt.tight_layout()
 plt.show()
 
-df_totFUDR25.to_csv('figures/Fig2G_25.csv')
-df_totFUDR40.to_csv('figures/Fig2G_40.csv')
-df_totFUDR100.to_csv('figures/Fig2G_100.csv')
-df_totFUDR200.to_csv('figures/Fig2G_200.csv')
-df_totFUDR400.to_csv('figures/Fig2G_400.csv')
+df_totFUDR25.to_csv('saved_data/FUdR_25_full_lsp_data.csv')
+df_totFUDR40.to_csv('saved_data/FUdR_40_full_lsp_data.csv')
+df_totFUDR100.to_csv('saved_data/FUdR_100_full_lsp_data.csv')
+df_totFUDR200.to_csv('saved_data/FUdR_200_full_lsp_data.csv')
+df_totFUDR400.to_csv('saved_data/FUdR_400_full_lsp_data.csv')
+
+df_FUDR25.to_csv('saved_data/FUdR_25_lsp_data.csv')
+df_FUDR40.to_csv('saved_data/FUdR_40_lsp_data.csv')
+df_FUDR100.to_csv('saved_data/FUdR_100_lsp_data.csv')
+df_FUDR200.to_csv('saved_data/FUdR_200_lsp_data.csv')
+df_FUDR400.to_csv('saved_data/FUdR_400_lsp_data.csv')
 
 print('FUDR25 n = {}'.format(df_FUDR25['count'][0]))
 print('FUDR40 n = {}'.format(df_FUDR40['count'][0]))
 print('FUDR100 n = {}'.format(df_FUDR100['count'][0]))
 print('FUDR200 n = {}'.format(df_FUDR200['count'][0]))
 print('FUDR400 n = {}'.format(df_FUDR400['count'][0]))
+
 #%% Figure 2H - MEAN LIFESPAN PLOTS FOR DIFFERENT FUdR CONCENTRATIONS
 ind_mls = df_totFUDR25.columns.get_loc('Reported mean lifespan')
 df_FUDR_list = [df_totFUDR25,df_totFUDR40,df_totFUDR100,df_totFUDR200,df_totFUDR400]
@@ -427,5 +451,4 @@ pd.DataFrame(mls_FUDR,index=['25µM','40µM','100µM','200µM','400µM']).transp
 
 for i in range(len(mls_FUDR)):
     print('mls FUDR: n = {}'.format(len(mls_FUDR[i])))
-    
     

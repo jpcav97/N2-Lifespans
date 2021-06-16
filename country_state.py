@@ -16,7 +16,7 @@ import random
 from sklearn.linear_model import LinearRegression
 
 from N2_functions import get_ttfp,randomvals_and_diff,residuals,pairplot,make_groups,\
-    plotlifespanspread,categorize,plotmeanlifespan, get_FUDR
+    plotlifespanspread,categorize,plotmeanlifespan, get_FUDR,get_countrystate
     
     #%%# Read in N2 Lifespans Data ####
 path = os.getcwd()
@@ -50,6 +50,7 @@ days = ['% Alive on Day3','% Alive on Day5','% Alive on Day10','% Alive on Day15
         '% Alive on Day40','% Alive on Day50']
 
 column_days = ['Day3','Day5','Day10','Day15','Day20','Day25','Day30','Day40','Day50']
+
 #%% Figure 4B-D
 """
                     FIGURE 4 - % ALIVE BY COUNTRY
@@ -107,7 +108,7 @@ for k in range(len(daystoplot)):
     ind = np.arange(Lcountries)+1  # the x locations for the groups
     width = 0.5
     
-    fig = plt.figure(figsize=(14,10)) ##### CHANGE FIG1 to FIG ##################
+    fig = plt.figure(figsize=(14,10)) 
     p1 = plt.bar(ind, df_alive['20%'], width, color='k')
     p2 = plt.bar(ind, df_alive['40%'], width, bottom=df_alive['20%'],color='chocolate')
     p3 = plt.bar(ind, df_alive['60%'], width, color='dodgerblue',\
@@ -193,6 +194,18 @@ for line in bp['boxes']:
 ######### Saving the Data #############
 #pd.DataFrame(avg_set,index=unique_group_countries['Names']).transpose().to_csv('/Users/nickurban/Desktop/N2 Lifespan Variability/Figures/mls_fig4E.csv')
 pd.DataFrame(avg_set,index=unique_group_countries['Names']).transpose().to_csv('figures/Fig4E.csv')
+
+#%% Lifespan curve graphs for countries
+tempm = 20
+tempc = 20
+cntrystate = True # True for country, False for states/provinces
+list_of_data,unique_group = get_countrystate(data_all,tempm,tempc,cntrystate)
+
+countries = ['United States', 'China', 'Germany', 'Republic of Korea', 'Japan']
+
+for i in range(len(countries)):
+    ind = np.where(np.isin(unique_group.iloc[:,0],countries[i]))
+    list_of_data[ind[0][0]].to_csv('saved_data/{}_lsp_data.csv'.format(countries[i]))
 
 #%% Figure 5B-D
 """
@@ -343,6 +356,18 @@ for line in bp['boxes']:
 ######### Saving the Data #############
 # pd.DataFrame(avg_set_states,index=unique_group_states['Names']).transpose().to_csv('/Users/nickurban/Desktop/N2 Lifespan Variability/Figures/mls_fig5E.csv')
 # pd.DataFrame(avg_set_states,index=unique_group_states['Names']).transpose().to_csv('figures/Fig5E.csv')
+
+#%% Lifespan curve graphs for countries
+tempm = 20
+tempc = 20
+cntrystate = False # True for country, False for states/provinces
+list_of_data,unique_group = get_countrystate(data_all,tempm,tempc,cntrystate)
+
+states = ['CA', 'MA', 'NY', 'WA', 'TX', 'MI']
+
+for i in range(len(states)):
+    ind = np.where(np.isin(unique_group.iloc[:,0],states[i]))
+    list_of_data[ind[0][0]].to_csv('saved_data/{}_lsp_data.csv'.format(states[i]))
 
 #%% Multivariate Linear Regression
 data_mv = data_new[data_new['Reported mean lifespan'] != -1]

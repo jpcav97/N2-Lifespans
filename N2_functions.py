@@ -14,6 +14,56 @@ from sklearn.linear_model import LinearRegression
 
 column_days = ['Day3','Day5','Day10','Day15','Day20','Day25','Day30','Day40','Day50']
 
+def get_countrystate(data,tempm,tempc,cntrystate):
+    columns = ['% Alive on Day3','% Alive on Day5','% Alive on Day10','% Alive on Day15',
+              '% Alive on Day20','% Alive on Day25','% Alive on Day30',
+              '% Alive on Day40','% Alive on Day50']
+    
+    df = data.loc[(data['Growth Media'] == 'NGM') & 
+                  (data['Temperature Maintained (Through L4, C)'] == tempm) &
+                  (data['Temperature Cultivated (Adult, C)'] == tempc)]
+    
+    if cntrystate == True:
+        ind_group = df.columns.get_loc('Lab Location (Country)')
+    else:
+        ind_group = df.columns.get_loc('Lab Location (State/Province)')
+    
+    group,freq_group = np.unique(data.iloc[(0,ind_group)],return_counts=True)
+    unique_group=pd.DataFrame(list(zip(group,freq_group)),columns=['Names','Frequency'])
+    unique_group = unique_group.reindex(np.argsort(unique_group['Frequency'])[::-1])
+    unique_group  = unique_group.reset_index(drop=True)
+    
+    lifespan_lists = [[] for _ in range(len(columns))]
+    ind_start = df.columns.get_loc('% Alive on Day3')
+    for i in range(len(columns)):
+        lifespan_lists[i] = df.iloc[(0,ind_start+i)]
+        
+    list_of_data = [_ for _ in range(len(group))]
+    group_list = df.iloc[0,ind_group]
+    df_lifespan = pd.DataFrame(lifespan_lists).transpose()
+    
+    for i in range(len(group)):
+        index = np.where(np.isin(group_list,unique_group.iloc[(i,0)]))
+        d20 = df_lifespan.iloc[(index)]     
+        
+        # Figure out stats for each day
+        Ldays = len(columns)
+        datalists = [[] for _ in range(Ldays)]
+
+        for j in range(Ldays):
+            s1 = d20.iloc[:,j].describe()
+            datalists[j] = [s1['count'],round(s1['mean'],2),s1['25%'],s1['50%'],s1['75%'],s1['std']]
+    
+        datalists = list(map(list,zip(*datalists)))
+        
+        # Turn list of lists into dataframe
+        data = pd.DataFrame(datalists,index=['count','mean','25%','median','75%','std'], 
+                              columns=['Day3','Day5','Day10','Day15','Day20',
+                                       'Day25','Day30','Day40','Day50']).transpose()
+        list_of_data[i] = data
+        
+    return list_of_data,unique_group
+
 def get_ttfp(data,transf1,transf2,isnm,tempm,tempc,isFUDR1,isFUDR2):
     ttfpcolumns = ['% Alive on Day3','% Alive on Day5','% Alive on Day10','% Alive on Day15',
               '% Alive on Day20','% Alive on Day25','% Alive on Day30',
@@ -101,11 +151,9 @@ def get_ttfp(data,transf1,transf2,isnm,tempm,tempc,isFUDR1,isFUDR2):
     
     # Turn list of lists into dataframe
     data_nm = pd.DataFrame(datalists_nm,index=['count','mean','25%','median','75%','std'], 
-                              columns=['Day3','Day5','Day10','Day15','Day20',
-                                       'Day25','Day30','Day40','Day50']).transpose()
+                              columns=column_days).transpose()
     data_m = pd.DataFrame(datalists_m,index=['count','mean','25%','median','75%','std'], 
-                              columns=['Day3','Day5','Day10','Day15','Day20',
-                                       'Day25','Day30','Day40','Day50']).transpose()
+                              columns=column_days).transpose()
     del ttfp_lists_nm,ttfp_lists_m,ttfp_lists_nm_all,ttfp_lists_m_all
     return df_totnm,df_totm,data_nm,data_m,df_totnm_all,df_totm_all
 
