@@ -199,14 +199,23 @@ pd.DataFrame(avg_set,index=unique_group_countries['Names']).transpose().to_csv('
 tempm = 20
 tempc = 20
 cntrystate = True # True for country, False for states/provinces
-list_of_data,unique_group = get_countrystate(data_all,tempm,tempc,cntrystate)
+list_of_data,unique_group,list_of_labs = get_countrystate(data_all,tempm,tempc,cntrystate)
 
 countries = ['United States', 'China', 'Germany', 'Republic of Korea', 'Japan']
 
+columns = ['# Labs','# Entries Total']
+unique_labs_countries = pd.DataFrame(index=countries,columns=columns,dtype = 'float64')
+
 for i in range(len(countries)):
     ind = np.where(np.isin(unique_group.iloc[:,0],countries[i]))
-    list_of_data[ind[0][0]].to_csv('saved_data/{}_lsp_data.csv'.format(countries[i]))
-
+    temp1 = list_of_data[ind[0][0]]
+    temp1.to_csv('saved_data/{}_lsp_data.csv'.format(countries[i]))
+    
+    # Find number of unique labs in each country
+    temp2 = np.unique(list_of_labs[ind[0][0]],return_counts = True)
+    unique_labs_countries.iloc[i,0] = len(temp2[1])
+    unique_labs_countries.iloc[i,1] = temp1['count'][0]
+    
 #%% Figure 5B-D
 """
                 FIGURE 5 - % ALIVE BY STATES/PROVINCE
@@ -224,7 +233,7 @@ for k in range(len(daystoplot)):
     set_data.pop(x[0])
     avg_set_states.pop(x[0])
     
-    Lstates = 10 # Number of countries to plot    
+    Lstates = 10 # Number of states to plot    
     perc_alive_lists = [[] for _ in range(6)]
     
     ### Create bar graph ###         
@@ -361,13 +370,22 @@ for line in bp['boxes']:
 tempm = 20
 tempc = 20
 cntrystate = False # True for country, False for states/provinces
-list_of_data,unique_group = get_countrystate(data_all,tempm,tempc,cntrystate)
+list_of_data,unique_group,list_of_labs = get_countrystate(data_all,tempm,tempc,cntrystate)
 
 states = ['CA', 'MA', 'NY', 'WA', 'TX', 'MI']
 
+columns = ['# Labs','# Entries Total']
+unique_labs_states = pd.DataFrame(index=states,columns=columns,dtype = 'float64')
+
 for i in range(len(states)):
     ind = np.where(np.isin(unique_group.iloc[:,0],states[i]))
-    list_of_data[ind[0][0]].to_csv('saved_data/{}_lsp_data.csv'.format(states[i]))
+    temp1 = list_of_data[ind[0][0]]
+    temp1.to_csv('saved_data/{}_lsp_data.csv'.format(states[i]))
+    
+    # Find number of unique labs in each state
+    temp2 = np.unique(list_of_labs[ind[0][0]],return_counts = True)
+    unique_labs_states.iloc[i,0] = len(temp2[1])
+    unique_labs_states.iloc[i,1] = temp1['count'][0]
 
 #%% Multivariate Linear Regression
 data_mv = data_new[data_new['Reported mean lifespan'] != -1]

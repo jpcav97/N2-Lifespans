@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import random
 import statsmodels.api as sm
 from sklearn.linear_model import LinearRegression
+import math
 
 column_days = ['Day3','Day5','Day10','Day15','Day20','Day25','Day30','Day40','Day50']
 
@@ -42,6 +43,10 @@ def get_countrystate(data,tempm,tempc,cntrystate):
     group_list = df.iloc[0,ind_group]
     df_lifespan = pd.DataFrame(lifespan_lists).transpose()
     
+    list_of_labs = [_ for _ in range(len(group))]
+    ind_lab = df.columns.get_loc('Lab')
+    labs = pd.Series(df.iloc[0,ind_lab])
+    
     for i in range(len(group)):
         index = np.where(np.isin(group_list,unique_group.iloc[(i,0)]))
         d20 = df_lifespan.iloc[(index)]     
@@ -62,7 +67,41 @@ def get_countrystate(data,tempm,tempc,cntrystate):
                                        'Day25','Day30','Day40','Day50']).transpose()
         list_of_data[i] = data
         
-    return list_of_data,unique_group
+        # Save Lab info
+        temp_labs = labs.iloc[(index)]
+        list_of_labs[i] = temp_labs
+        
+    return list_of_data,unique_group,list_of_labs
+
+def mean_confidence_interval(data,labels):
+    L = len(data)
+    all_stat = [[] for _ in range(L)]
+    # Calculate Confidence Intervals
+    for i in range(L):
+        
+        
+        m = np.mean(data[i])
+        s = np.std(data[i])
+        L = len(data[i])
+        sem = s/math.sqrt(L) # Figure out the z value CI = mean ± z * mean/√n
+        h = sem * 1.96
+        
+        stat = pd.Series(data[i]).describe()
+        
+        print('\n############# {} (n = {}) #############'.format(labels[i],
+                                    stat['count']))
+        
+        print('mean = {}, lower CI = {}, upper CI = {}'.format(round(m,2),
+                                    round(m-h,2),round(m+h,2)))
+        
+        print('median = {}, 25% = {}, 75% = {}'.format(round(stat['50%'],2),
+                                    round(stat['25%'],2),round(stat['75%'],2)))
+        all_stat[i] = stat
+        
+    all_stat = pd.DataFrame(all_stat).transpose()
+    all_stat.index = stat.index
+    all_stat.columns = labels
+    return m, h, all_stat
 
 def get_ttfp(data,transf1,transf2,isnm,tempm,tempc,isFUDR1,isFUDR2):
     ttfpcolumns = ['% Alive on Day3','% Alive on Day5','% Alive on Day10','% Alive on Day15',
