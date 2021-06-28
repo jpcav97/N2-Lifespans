@@ -10,6 +10,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import random
 import statsmodels.api as sm
+import scipy.stats as st
 from sklearn.linear_model import LinearRegression
 import math
 
@@ -73,35 +74,65 @@ def get_countrystate(data,tempm,tempc,cntrystate):
         
     return list_of_data,unique_group,list_of_labs
 
-def mean_confidence_interval(data,labels):
+def mean_confidence_interval(data,labels,figsize):
     L = len(data)
-    all_stat = [[] for _ in range(L)]
+    all_stat_lists = [[] for _ in range(L)]
+    
     # Calculate Confidence Intervals
     for i in range(L):
-        
-        
+        L2 = len(data[i])
         m = np.mean(data[i])
-        s = np.std(data[i])
-        L = len(data[i])
-        sem = s/math.sqrt(L) # Figure out the z value CI = mean ± z * mean/√n
-        h = sem * 1.96
-        
+        if L2 < 30:
+            CIs = st.t.interval(alpha=0.95,df=len(data[i])-1,loc=m,
+                                scale=st.sem(data[i]))
+        else:
+            CIs = st.norm.interval(alpha=0.95,loc=np.mean(data[i]),scale=st.sem(data[i]))
         stat = pd.Series(data[i]).describe()
-        
+        stat['Lower CI'] = CIs[0]
+        stat['Upper CI'] = CIs[1]
+        all_stat_lists[i] = stat
+
         print('\n############# {} (n = {}) #############'.format(labels[i],
                                     stat['count']))
         
         print('mean = {}, lower CI = {}, upper CI = {}'.format(round(m,2),
-                                    round(m-h,2),round(m+h,2)))
+                                    round(CIs[0],2),round(CIs[1],2)))
         
         print('median = {}, 25% = {}, 75% = {}'.format(round(stat['50%'],2),
                                     round(stat['25%'],2),round(stat['75%'],2)))
-        all_stat[i] = stat
         
-    all_stat = pd.DataFrame(all_stat).transpose()
+    all_stat = pd.DataFrame(all_stat_lists).transpose()
     all_stat.index = stat.index
     all_stat.columns = labels
-    return m, h, all_stat
+    
+    # Plot mean and confidence intervals
+    LCI = all_stat.index.get_loc('Lower CI')
+    UCI = all_stat.index.get_loc('Upper CI')
+    m_ind = all_stat.index.get_loc('mean')
+    CI = np.array(all_stat.iloc[m_ind,:] - all_stat.iloc[LCI,:])
+    CI_labels = [str(round(x,2))+'-' for x in np.array(all_stat.iloc[LCI,:])]
+    CI_labels = [CI_labels[x]+str(round(all_stat.iloc[UCI,x],2)) for x in range(len(CI_labels))]
+    x = np.arange(0,L)+1
+    
+    colors = ['magenta','black','dodgerblue','darkorange','lightgrey','forestgreen']
+    fig,(ax1)=plt.subplots(1,1,figsize = figsize)
+    for i in range(L):
+        ax1.errorbar(x[i],all_stat.iloc[m_ind,i],yerr=CI[i],label=CI_labels[i], 
+                     elinewidth=0.5, capsize=3, c=colors[i], mfc=colors[i],
+                     mec=colors[i], marker='o', ls='')
+    
+    # Get handles
+    handles, labels2 = ax1.get_legend_handles_labels()
+    # Remove the errorbars
+    handles = [h[0] for h in handles]
+    # Use them in the legend
+    ax1.legend(handles, labels2, loc='upper right',numpoints=1,title='Lower CI - Upper CI')
+    new_labels = [labels[n]+'\n(n='+str(round(all_stat.loc['count'][n]))+')' \
+                  for n in range(len(labels))]
+    plt.xticks(np.arange(0,L)+1,new_labels) 
+    plt.xlim(0.25,L+figsize[0]/5.5)
+    plt.ylabel('Mean Reported Lifespan (days)')
+    return all_stat
 
 def get_ttfp(data,transf1,transf2,isnm,tempm,tempc,isFUDR1,isFUDR2):
     ttfpcolumns = ['% Alive on Day3','% Alive on Day5','% Alive on Day10','% Alive on Day15',

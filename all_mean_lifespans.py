@@ -124,6 +124,38 @@ for j in range(2):
 df4 = list(mls_FUDR[0]) # no FUdR at 20˚C
 df5 = list(mls_FUDR[1]) # wFUdR at 20˚C
 
+#%% FUDR vs No FUDR at 25˚C
+for j in range(3,5):
+    temp = data_all2.iloc[j,ind_mls]
+    temp = [x for x in temp if x > -1.0]
+    #a = np.array(temp, int)
+    mls_FUDR[j-3] = temp
+    
+df29 = list(mls_FUDR[0]) # no FUdR at 25˚C
+df30 = list(mls_FUDR[1]) # wFUdR at 25˚C
+
+#%% FUDR Concentrations
+df_totFUDR25, df_FUDR25 = get_FUDR(data_all2,25.0)
+df_totFUDR40, df_FUDR40 = get_FUDR(data_all2,40.0)
+df_totFUDR100, df_FUDR100 = get_FUDR(data_all2,100.0)
+df_totFUDR200, df_FUDR200 = get_FUDR(data_all2,200.0)
+df_totFUDR400, df_FUDR400 = get_FUDR(data_all2,400.0)
+ind_mls = df_totFUDR25.columns.get_loc('Reported mean lifespan')
+df_FUDR_list = [df_totFUDR25,df_totFUDR40,df_totFUDR100,df_totFUDR200,df_totFUDR400]
+mls_FUDR = [[] for _ in range(len(df_FUDR_list))] # Plotting 5 different concentrations
+
+for j in range(len(df_FUDR_list)):
+    temp = list(df_FUDR_list[j].iloc[:,ind_mls])
+    temp = [x for x in temp if x > -1.0]
+    #a = np.array(temp, int)
+    mls_FUDR[j] = temp
+
+df31 = list(mls_FUDR[0]) # 25 FUdR at 20˚C
+df32 = list(mls_FUDR[1]) # 40 FUdR at 20˚C
+df33 = list(mls_FUDR[2]) # 100 FUdR at 20˚C
+df34 = list(mls_FUDR[3]) # 200 FUdR at 20˚C
+df35 = list(mls_FUDR[4]) # 400 FUdR at 20˚C
+
 #%% Any plate manipulation vs no manipulation at 15˚C
 df_totnm,df_totm,data_nm,data_m,df_totnm_all,df_totm_all = get_ttfp(data_all3,'Every other day','After L4',True,15,15,False,False)
 ind_mls = df_totnm.columns.get_loc('Reported mean lifespan')
@@ -221,7 +253,8 @@ df28 = avg_set[5] # MI 20C
 
 #%% Create large list with all data
 dfs = [df1,df2,df3,df4,df5,df6,df7,df8,df9,df10,df11,df12,df13,df14,df15,df16,\
-       df17,df18,df19,df20,df21,df22,df23,df24,df25,df26,df27,df28]
+       df17,df18,df19,df20,df21,df22,df23,df24,df25,df26,df27,df28,df29,df30,\
+       df31,df32,df33,df34,df35]
 
 index = ['15˚C','20˚C','25˚C','no FUdR at 20˚C','with FUdR at 20˚C','no manipulation at 15˚C',\
         'with any manipulation at 15˚C','no manipulation at 20˚C','with manipulation at 20˚C',\
@@ -229,7 +262,9 @@ index = ['15˚C','20˚C','25˚C','no FUdR at 20˚C','with FUdR at 20˚C','no man
         'Every 2-3 day manipulation at 20˚C','no manipulation no FUdR at 20˚C',\
         'no manipulation with FUdR at 20˚C','with manipulation no FUdR at 20˚C',\
         'with manipulation with FUdR at 20˚C', 'USA','China','Germany',\
-        'Rep. of Korea','Japan','CA','MA','NY','WA','TX','MI']
+        'Rep. of Korea','Japan','CA','MA','NY','WA','TX','MI','no FUdR at 25˚C',\
+        'with FUdR at 25˚C','[25] FUDR at 20˚C','[40] FUDR at 20˚C','[100] FUDR at 20˚C',\
+        '[200] FUDR at 20˚C','[400] FUDR at 20˚C']
 
 all_mls_data = pd.DataFrame(dfs,index=index).transpose()
 all_mls_data.to_csv('all_mls_data.csv')
@@ -267,28 +302,44 @@ print('mean = {}, lower CI = {}, upper CI = {}'.format(round(m,2),round(m-h,2),r
 stat = pd.Series(all_rml).describe()
 print('median = {}, 25% = {}, 75% = {}'.format(round(stat['50%'],2),round(stat['25%'],2),round(stat['75%'],2)))
 
-labels_temp = ['15C','20C','25C']
-mean_temp, CI_temp, stat_temp = mean_confidence_interval([df1,df2,df3],labels_temp)
+labels_temp = ['15˚C','20˚C','25˚C']
+stat_temp = mean_confidence_interval([df1,df2,df3],labels_temp,(7,5))
 
-labels_fudr = ['noFUDR','wFUDR']
-mean_FUDR, CI_FUDR, stat_FUDR = mean_confidence_interval([df4,df5],labels_fudr)
+labels_fudr20 = ['(-)FUDR 20˚C','FUDR 20˚C']
+stat_FUDR = mean_confidence_interval([df4,df5],labels_fudr20,(7,5))
 
-labels_ttfp = ['no manipulation 20C','manipulation 20C']
-mean_ttfp, CI_ttfp, stat_ttfp = mean_confidence_interval([df8,df9],labels_ttfp)
+labels_fudr25 = ['(-)FUDR 25˚C','FUDR 25˚C']
+stat_FUDR25 = mean_confidence_interval([df29,df30],labels_fudr25,(7,5))
+
+labels_fudr_conc = ['[FUDR] = 25µM','[FUDR] = 40µM','[FUDR] = 100µM',
+                    '[FUDR] = 200µM','[FUDR] = 400µM']
+stat_FUDRc = mean_confidence_interval([df31,df32,df33,df34,df35],labels_fudr_conc,(11,4))
+
+labels_ttfp = ['No Manipulation 20˚C','Manipulation 20˚C']
+stat_ttfp = mean_confidence_interval([df8,df9],labels_ttfp,(7,5))
 
 labels_cntry = ['USA','China','Germany','Republic of Korea','Japan']
-mean_cntry, CI_cntry, stat_cntry = mean_confidence_interval([df18,df19,df20,df21,df22],labels_cntry)
+stat_cntry = mean_confidence_interval([df18,df19,df20,df21,df22],labels_cntry,(10,4))
 
 labels_states = ['CA','MA','NY','WA','TX','MI']
-mean_states, CI_states, stat_states = mean_confidence_interval([df23,df24,df25,df26,df27,df28],labels_states)
+stat_states = mean_confidence_interval([df23,df24,df25,df26,df27,df28],labels_states,(10,4))
 
 #%% ANOM
 # Group data by analyses
 rml_temp = [df1,df2,df3] # each 'df' is a list
 temp_crit_value = 2.39 # Based on table from paper given by Santiago
 
-rml_fudr = [df4,df5]
-fudr_crit_value = 2.24
+rml_fudr20 = [df4,df5]
+fudr20_crit_value = 2.24
+
+rml_fudr25 = [df29,df30]
+fudr25_crit_value = 2.35
+
+rml_fudrc = [df31,df32,df33,df34,df35]
+fudrc_crit_value = 2.65
+
+rml_ttfp = [df8,df9]
+ttfp_crit_value = 2.24
 
 rml_cntry = [df18,df19,df20,df21,df22]
 cntry_crit_value = 2.57
@@ -297,16 +348,19 @@ rml_state = [df23,df24,df25,df26,df27,df28]
 state_crit_value = 2.67
 
 # Save above data as list of lists
-rmls = [rml_temp,rml_fudr,rml_cntry,rml_state]
+rmls = [rml_temp,rml_fudr20,rml_fudr25,rml_fudrc,rml_ttfp,rml_cntry,rml_state]
 
 # Save critical values into one list
-crit_vals = [temp_crit_value,fudr_crit_value,cntry_crit_value,state_crit_value]
+crit_vals = [temp_crit_value,fudr20_crit_value,fudr25_crit_value,fudrc_crit_value,
+             ttfp_crit_value,cntry_crit_value,state_crit_value]
 
 # Save labels into one list
-labels = [labels_temp,labels_fudr,labels_cntry,labels_states]
+labels = [labels_temp,labels_fudr20,labels_fudr25,labels_fudr_conc,labels_ttfp,
+          labels_cntry,labels_states]
 
 all_CIs = [[] for _ in range(len(rmls))]
-all_avgs = [0]*len(rmls)
+all_avgs = [[] for _ in range(len(rmls))]
+all_gms = [0]*len(rmls)
 
 for i in range(len(rmls)):
     # Calculate Grand Mean
@@ -321,32 +375,43 @@ for i in range(len(rmls)):
     
     # Calculate decision lines
     all_CIs[i] = [crit_vals[i]*math.sqrt(MSe)*math.sqrt((N-j)/(N*j)) for j in Ns]
-    all_avgs[i] = avg_tot
+    all_avgs[i] = [np.mean(m) for m in rmls[i]]
+    all_gms[i] = avg_tot
     
-for i in range(len(rmls)):
     # Plot line representing Grand Mean
-    plt.figure()
-    y = np.arange(0,len(rmls[i])+1)
-    plt.plot(y,[all_avgs[i]]*len(y),'--k')
+    if i == 3: # Different [FUDR] (NEEDS MORE SPACE FOR LABELS)
+        figsize = (9,4)
+    else:
+        figsize = (6,4)
     
+    m = 1
+    w = 0.5
+    plt.figure(figsize=figsize)
+    y = np.arange(0,m*len(rmls[i])+3)
+    plt.plot(y,[all_gms[i]]*len(y),'--k')
+    
+    xcoord=0
     for j in range(len(rmls[i])):
         # Plot line from Grand Mean to mean of group i
-        xcoord = j+1
-        if np.mean(rmls[i][j]) < all_avgs[i]:
-            y1 = np.arange(np.mean(rmls[i][j]),all_avgs[i],0.1)
+        if np.mean(rmls[i][j]) < all_gms[i]:
+            y1 = np.arange(all_avgs[i][j],all_gms[i],0.01)
         else:
-            y1 = np.arange(all_avgs[i],np.mean(rmls[i][j]),0.1)
+            y1 = np.arange(all_gms[i],all_avgs[i][j],0.01)
+        if i == 3: # Different [FUDR]
+            xcoord = xcoord + m
+        else:
+            xcoord = j+m
         x1 = [xcoord]*len(y1)
         plt.plot(x1,y1,'k')
         
         # Plot decision lines
-        upper_dl_x = [xcoord-0.5,xcoord,xcoord+0.5]
-        upper_dl_y1 = [all_avgs[i]]*3
-        upper_dl_y2 = [all_avgs[i]+all_CIs[i][j]]*3
-        lower_dl_x = [xcoord-0.5,xcoord,xcoord+0.5]
-        lower_dl_y1 = [all_avgs[i]-all_CIs[i][j]]*3
-        lower_dl_y2 = [all_avgs[i]]*3
-
+        upper_dl_x = [xcoord-w,xcoord,xcoord+w]
+        upper_dl_y1 = [all_gms[i]]*3
+        upper_dl_y2 = [all_gms[i]+all_CIs[i][j]]*3
+        lower_dl_x = [xcoord-w,xcoord,xcoord+w]
+        lower_dl_y1 = [all_gms[i]-all_CIs[i][j]]*3
+        lower_dl_y2 = [all_gms[i]]*3
+        
         plt.fill_between(upper_dl_x,upper_dl_y1,upper_dl_y2,color='lightgrey',
                          linestyle='--',edgecolor='k')
         plt.fill_between(lower_dl_x,lower_dl_y1,lower_dl_y2,color='lightgrey',
@@ -355,15 +420,51 @@ for i in range(len(rmls)):
         # Plot Dot
         plt.scatter(xcoord,np.mean(rmls[i][j]),c='k',s=50)
     
-    if i == 2:
-        plt.xticks(np.arange(0,len(rmls[i]))+1,labels=labels[i],rotation=25)
+    new_labels = [labels[i][n]+'\n(n='+str(Ns[n])+')' for n in range(len(Ns))]
+    if i == 5:
+        plt.xticks(np.arange(0,m*len(rmls[i]),m)+m,labels=new_labels,rotation=25)
     else:
-        plt.xticks(np.arange(0,len(rmls[i]))+1,labels=labels[i])
-    plt.xlim(0,len(rmls[i])+1)
-    ylim = max([abs(all_avgs[i]-np.mean(x)) for x in rmls[i]])
-    plt.ylim(all_avgs[i]-ylim*1.1,all_avgs[i]+ylim*1.1)
+        plt.xticks(np.arange(0,m*len(rmls[i]),m)+m,labels=new_labels)
+    
+    plt.xlim(0,m*len(rmls[i])+m)
+    
+    # Find max difference between all decision lines and Grand Mean
+    CI_diff = max(all_CIs[i])
+    # Find max difference between all means and Grand Mean
+    mean_diff = max([abs(all_gms[i]-np.mean(x)) for x in rmls[i]])
+    # Set ylim to whichever is great from above differences
+    ylim = max(CI_diff,mean_diff)
+    if i == 0:
+        plt.ylim(13,all_gms[i]+ylim*1.15)
+    elif ylim < 1:
+        plt.ylim(all_gms[i]-ylim*2,all_gms[i]+ylim*2)
+    else:
+        plt.ylim(all_gms[i]-ylim*1.15,all_gms[i]+ylim*1.15)
+        
     plt.ylabel('Reported Mean Lifespan')
-    plt.grid()
     plt.tight_layout()
+    plt.savefig('figures/{}.eps'.format(labels[i]), format='eps')
     plt.show()
+   
+temp_ANOM_data = pd.DataFrame({'Averages': all_avgs[0],'Grand Means': [all_gms[0]]*len(all_avgs[0]),
+                          'Decision Lines': all_CIs[0]}).to_csv('saved_data/temp_ANOM_data.csv')
+
+fudr20_ANOM_data = pd.DataFrame({'Averages': all_avgs[1],'Grand Means': [all_gms[0]]*len(all_avgs[1]),
+                          'Decision Lines': all_CIs[1]}).to_csv('saved_data/fudr20_ANOM_data.csv')
+
+fudr25_ANOM_data = pd.DataFrame({'Averages': all_avgs[2],'Grand Means': [all_gms[0]]*len(all_avgs[2]),
+                          'Decision Lines': all_CIs[2]}).to_csv('saved_data/fudr25_ANOM_data.csv')
+
+fudrc_ANOM_data = pd.DataFrame({'Averages': all_avgs[3],'Grand Means': [all_gms[0]]*len(all_avgs[3]),
+                          'Decision Lines': all_CIs[3]}).to_csv('saved_data/fudrc_ANOM_data.csv')
+
+ttfp_ANOM_data = pd.DataFrame({'Averages': all_avgs[4],'Grand Means': [all_gms[0]]*len(all_avgs[4]),
+                          'Decision Lines': all_CIs[4]}).to_csv('saved_data/ttfp_ANOM_data.csv')
+
+cntry_ANOM_data = pd.DataFrame({'Averages': all_avgs[5],'Grand Means': [all_gms[0]]*len(all_avgs[5]),
+                          'Decision Lines': all_CIs[5]}).to_csv('saved_data/cntry_ANOM_data.csv')
+
+state_temp_ANOM_data = pd.DataFrame({'Averages': all_avgs[6],'Grand Means': [all_gms[0]]*len(all_avgs[6]),
+                          'Decision Lines': all_CIs[6]}).to_csv('saved_data/state_ANOM_data.csv')
+
     
