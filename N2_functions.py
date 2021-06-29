@@ -132,6 +132,8 @@ def mean_confidence_interval(data,labels,figsize):
     plt.xticks(np.arange(0,L)+1,new_labels) 
     plt.xlim(0.25,L+figsize[0]/5.5)
     plt.ylabel('Mean Reported Lifespan (days)')
+    plt.savefig('figures/{}_rml_CIs.eps'.format(' '.join(labels)), format='eps')
+    plt.show
     return all_stat
 
 def get_ttfp(data,transf1,transf2,isnm,tempm,tempc,isFUDR1,isFUDR2):
