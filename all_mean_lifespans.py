@@ -5,14 +5,12 @@ Created on Wed Jun  9 14:00:05 2021
 
 @author: josephcavataio
 """
-import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from scipy import stats
 import os
 
-from N2_functions import get_ttfp,randomvals_and_diff,residuals,pairplot,make_groups,\
-    plotlifespanspread,categorize,plotmeanlifespan, get_FUDR,mean_confidence_interval
+from N2_functions import get_ttfp,make_groups,get_FUDR
     
     #%%# Read in N2 Lifespans Data ####
 path = os.getcwd()
@@ -53,7 +51,6 @@ plt.xlabel('Days Alive')
 plt.ylabel('Frequency')
 plt.legend()
 plt.show()
-
 
 #%% Group entries by Temp and Growth Media (data for figure 1)
 P=3
@@ -266,7 +263,7 @@ index = ['15˚C','20˚C','25˚C','(-)FUDR 20˚C','FUDR 20˚C','No Manipulation 1
         '[FUDR] = 25µM','[FUDR] = 40µM','[FUDR] = 100µM','[FUDR] = 200µM','[FUDR] = 400µM']
 
 all_mls_data = pd.DataFrame(dfs,index=index).transpose()
-all_mls_data.to_csv('all_mls_data.csv')
+# all_mls_data.to_csv('all_mls_data.csv')
 
 #%% All mean lifespans
 ind_mls = data_all.columns.get_loc('Reported mean lifespan')
@@ -284,6 +281,6 @@ all_rml = all_rml.sort_values('All Reported mean lifespan data')
 print('% of entries with reported mean lifespan = {}%'\
       .format(round(100*len(all_rml)/len(data),2)))
 
-data_rml.to_csv('saved_data/grouped_by_temp_rmls.csv')
-all_rml.to_csv('saved_data/total_dataset_rmls.csv')
+# data_rml.to_csv('saved_data/grouped_by_temp_rmls.csv')
+# all_rml.to_csv('saved_data/total_dataset_rmls.csv')
 

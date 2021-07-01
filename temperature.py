@@ -13,16 +13,18 @@ from scipy import stats
 import os
 import random
 
-from N2_functions import randomvals_and_diff,residuals,pairplot,make_groups,\
-    plotlifespanspread,plotmeanlifespan
+from N2_functions import randomvals_and_diff,residuals,pairplot,make_groups
+
 #%%# Read in N2 Lifespans Data ####
 path = os.getcwd()
 filename = 'N2 Lifespans FINAL.xlsx'
+filename = 'Supplemental File 1.xlsx'
 path = os.path.join(path, filename)
 data = pd.read_excel(path)
 data = data.drop(columns=data.columns[0])
 
 #### Percent of data excluded for different categories ####
+""" UNCOMMENT BELOW FOR STATS ON MISSING DATA """
 # strainused =  data['N2 Strain Used']
 # strainsource = data['N2 Strain Source']
 # growthmedia = data['Growth Media']

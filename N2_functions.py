@@ -12,7 +12,6 @@ import random
 import statsmodels.api as sm
 import scipy.stats as st
 from sklearn.linear_model import LinearRegression
-import math
 
 column_days = ['Day3','Day5','Day10','Day15','Day20','Day25','Day30','Day40','Day50']
 

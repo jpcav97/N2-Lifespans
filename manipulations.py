@@ -10,13 +10,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from scipy import stats
 import os
-from PIL import Image
-import io
-import random
-from sklearn.linear_model import LinearRegression
 
-from N2_functions import get_ttfp,randomvals_and_diff,residuals,pairplot,make_groups,\
-    plotlifespanspread,categorize,plotmeanlifespan, get_FUDR
+from N2_functions import get_ttfp, make_groups
     
     #%%# Read in N2 Lifespans Data ####
 path = os.getcwd()

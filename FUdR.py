@@ -10,7 +10,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from scipy import stats
 import os
-from N2_functions import make_groups,plotlifespanspread,plotmeanlifespan,get_FUDR
+from N2_functions import make_groups,plotlifespanspread,get_FUDR
     
     #%%# Read in N2 Lifespans Data ####
 path = os.getcwd()
